@@ -1,10 +1,10 @@
 {
   "name": "todo-list-app",
   "version": "1.0.0",
-  "description": "A sophisticated TODO list application built with Node.js 18 and Express 4.x",
+  "description": "A sophisticated TODO list application built with Node.js 20 and Express 4.x",
   "main": "src/server.js",
   "engines": {
-    "node": ">=18.0.0 <19.0.0"
+    "node": ">=20.0.0 <21.0.0"
   },
   "scripts": {
     "start": "node src/server.js",
