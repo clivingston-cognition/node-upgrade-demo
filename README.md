@@ -1,12 +1,12 @@
 # TODO List App
 
-A sophisticated TODO list application built with **Node.js 18** and **Express 4.x**, featuring a SQLite local database, full CRUD API, a responsive dark-themed UI, and comprehensive test coverage.
+A sophisticated TODO list application built with **Node.js 20** and **Express 4.x**, featuring a SQLite local database, full CRUD API, a responsive dark-themed UI, and comprehensive test coverage.
 
 ## Tech Stack
 
 | Component      | Technology                    | Version   |
 |----------------|-------------------------------|-----------|
-| Runtime        | Node.js                       | 18.x LTS  |
+| Runtime        | Node.js                       | 20.x LTS  |
 | Framework      | Express.js                    | 4.18.x    |
 | Database       | SQLite (via better-sqlite3)   | 9.x       |
 | Templating     | EJS                           | 3.x       |
@@ -33,21 +33,21 @@ A sophisticated TODO list application built with **Node.js 18** and **Express 4.
 
 ## Prerequisites
 
-- **Node.js 18.x** (required — the app enforces this via `engines` in `package.json`)
+- **Node.js 20.x** (required — the app enforces this via `engines` in `package.json`)
 - **npm** (comes with Node.js)
 - **nvm** (recommended for managing Node versions)
 
 ## Setup & Installation
 
-### 1. Install Node.js 18
+### 1. Install Node.js 20
 
 ```bash
 # Using nvm (recommended)
-nvm install 18
-nvm use 18
+nvm install 20
+nvm use 20
 
 # Verify
-node --version   # Should show v18.x.x
+node --version   # Should show v20.x.x
 ```
 
 ### 2. Install Dependencies
