@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    <%- tableStyles %>
+
+    /* Dark theme overrides for the component library table */
+    .tcl-table-wrapper {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .tcl-table {
+      font-family: var(--font-family);
+      --tcl-table-head-bg: var(--color-surface-hover);
+      --tcl-table-head-color: var(--color-text);
+      --tcl-table-head-hover-bg: var(--color-border);
+      --tcl-table-border-color: var(--color-border);
+      --tcl-table-cell-color: var(--color-text);
+      --tcl-table-stripe-bg: rgba(255, 255, 255, 0.02);
+      --tcl-table-hover-bg: rgba(99, 102, 241, 0.08);
+      --tcl-table-sorted-color: var(--color-primary);
+      --tcl-table-empty-color: var(--color-text-muted);
+    }
+
+    .table-nav {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .table-nav .btn {
+      font-size: 0.85rem;
+      padding: 6px 14px;
+    }
+
+    .table-view-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .table-view-header h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--color-text);
+    }
+
+    .table-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+
+    .table-stats strong {
+      color: var(--color-text);
+    }
+
+    .table-pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      padding: 20px 0;
+    }
+
+    .table-pagination a,
+    .table-pagination span {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      text-decoration: none;
+      font-family: var(--font-family);
+    }
+
+    .table-pagination a {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+      transition: border-color var(--transition);
+    }
+
+    .table-pagination a:hover {
+      border-color: var(--color-primary);
+    }
+
+    .table-pagination .disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .table-pagination .page-info {
+      color: var(--color-text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-content">
+        <h1 class="app-title">
+          <span class="title-icon">&#9745;</span>
+          TODO List
+        </h1>
+        <nav class="table-nav">
+          <a href="/" class="btn btn-secondary">Card View</a>
+          <a href="/table" class="btn btn-primary">Table View</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <section>
+        <div class="table-view-header">
+          <h2>All Todos &mdash; Table View</h2>
+          <div class="table-stats">
+            <span>Total: <strong><%= stats.total %></strong></span>
+            <span>Pending: <strong><%= stats.pending %></strong></span>
+            <span>Done: <strong><%= stats.completed %></strong></span>
+            <span>Overdue: <strong><%= stats.overdue %></strong></span>
+          </div>
+        </div>
+
+        <%- tableHtml %>
+
+        <% if (pagination.totalPages > 1) { %>
+        <div class="table-pagination">
+          <% if (pagination.hasPrev) { %>
+            <a href="/table?page=<%= pagination.page - 1 %>&sort=<%= sort %>&order=<%= order %>">Prev</a>
+          <% } else { %>
+            <a class="disabled">Prev</a>
+          <% } %>
+          <span class="page-info">Page <%= pagination.page %> of <%= pagination.totalPages %></span>
+          <% if (pagination.hasNext) { %>
+            <a href="/table?page=<%= pagination.page + 1 %>&sort=<%= sort %>&order=<%= order %>">Next</a>
+          <% } else { %>
+            <a class="disabled">Next</a>
+          <% } %>
+        </div>
+        <% } %>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
