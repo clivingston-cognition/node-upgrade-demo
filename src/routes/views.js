@@ -13,8 +13,9 @@ router.get('/', (_req, res) => {
 router.get('/table', (req, res) => {
   try {
     const page = parseInt(req.query.page, 10) || 1;
-    const sort = req.query.sort || 'created_at';
-    const order = req.query.order || 'DESC';
+    const allowedSorts = ['created_at', 'updated_at', 'title', 'priority', 'due_date'];
+    const sort = allowedSorts.includes(req.query.sort) ? req.query.sort : 'created_at';
+    const order = ['ASC', 'DESC'].includes(String(req.query.order || '').toUpperCase()) ? String(req.query.order).toUpperCase() : 'DESC';
 
     const result = todoModel.findAll({
       page,
