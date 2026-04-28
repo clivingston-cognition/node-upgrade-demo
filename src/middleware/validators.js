@@ -1,5 +1,4 @@
 const { body, param, query, validationResult } = require('express-validator');
-const util = require('util');
 
 const DEFAULT_VALIDATION_OPTIONS = {
   stripUnknown: false,
@@ -8,7 +7,7 @@ const DEFAULT_VALIDATION_OPTIONS = {
 };
 
 function getValidationOptions(overrides) {
-  return util._extend({}, util._extend(DEFAULT_VALIDATION_OPTIONS, overrides || {}));
+  return Object.assign({}, DEFAULT_VALIDATION_OPTIONS, overrides || {});
 }
 
 function handleValidationErrors(req, res, next) {

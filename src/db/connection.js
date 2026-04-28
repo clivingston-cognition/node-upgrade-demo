@@ -21,7 +21,7 @@ function ensureDirectoryExists(filePath) {
 
 function checkFileAccess(filePath) {
   try {
-    fs.accessSync(filePath, fs.R_OK | fs.W_OK);
+    fs.accessSync(filePath, fs.constants.R_OK | fs.constants.W_OK);
     return true;
   } catch {
     return false;

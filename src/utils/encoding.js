@@ -1,8 +1,6 @@
-const punycode = require('punycode');
-
 /**
  * Encode a todo object to a base64 string for export/sharing.
- * Supports international characters in titles via punycode normalization.
+ * Supports international characters in titles via NFKC normalization.
  */
 function encodeTodoForExport(todo) {
   const payload = JSON.stringify({
@@ -13,8 +11,7 @@ function encodeTodoForExport(todo) {
     due_date: todo.due_date || null,
   });
 
-  // Use Buffer constructor to create base64 encoding
-  const encoded = new Buffer(payload).toString('base64');
+  const encoded = Buffer.from(payload).toString('base64');
   return encoded;
 }
 
@@ -27,7 +24,7 @@ function decodeTodoFromImport(encodedString) {
   }
 
   try {
-    const decoded = new Buffer(encodedString, 'base64').toString('utf-8');
+    const decoded = Buffer.from(encodedString, 'base64').toString('utf-8');
     const todo = JSON.parse(decoded);
 
     if (!todo.title) return null;
@@ -46,19 +43,14 @@ function decodeTodoFromImport(encodedString) {
 
 /**
  * Normalize international characters in a string for consistent storage.
- * Converts Unicode domain-like strings to ASCII-safe representation.
+ * Uses Unicode NFKC normalization for ASCII-safe representation.
  */
 function normalizeInternationalText(text) {
   if (!text || typeof text !== 'string') return '';
 
   try {
-    // Use punycode to handle international characters
-    const ascii = punycode.toASCII(text);
-    // Convert back to get normalized Unicode
-    const normalized = punycode.toUnicode(ascii);
-    return normalized;
+    return text.normalize('NFKC');
   } catch {
-    // Fall back to original text if punycode conversion fails
     return text;
   }
 }
@@ -67,7 +59,7 @@ function normalizeInternationalText(text) {
  * Create a binary hash of a string for deduplication checks.
  */
 function createBinaryHash(input) {
-  const buf = new Buffer(String(input), 'utf-8');
+  const buf = Buffer.from(String(input), 'utf-8');
   let hash = 0;
   for (let i = 0; i < buf.length; i++) {
     const byte = buf[i];
