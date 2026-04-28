@@ -1,17 +1,17 @@
 # TODO List App
 
-A sophisticated TODO list application built with **Node.js 18** and **Express 4.x**, featuring a SQLite local database, full CRUD API, a responsive dark-themed UI, and comprehensive test coverage.
+A sophisticated TODO list application built with **Node.js 24** and **Express 4.x**, featuring a SQLite local database, full CRUD API, a responsive dark-themed UI, and comprehensive test coverage.
 
 ## Tech Stack
 
 | Component      | Technology                    | Version   |
 |----------------|-------------------------------|-----------|
-| Runtime        | Node.js                       | 18.x LTS  |
-| Framework      | Express.js                    | 4.18.x    |
-| Database       | SQLite (via better-sqlite3)   | 9.x       |
+| Runtime        | Node.js                       | 24.x LTS  |
+| Framework      | Express.js                    | 4.22.x    |
+| Database       | SQLite (via better-sqlite3)   | 12.x      |
 | Templating     | EJS                           | 3.x       |
 | Validation     | express-validator             | 7.x       |
-| Testing        | Jest + Supertest              | 29.x / 6.x |
+| Testing        | Jest + Supertest              | 29.x / 7.x |
 | Linting        | ESLint                        | 8.x       |
 
 ## Features
@@ -33,21 +33,21 @@ A sophisticated TODO list application built with **Node.js 18** and **Express 4.
 
 ## Prerequisites
 
-- **Node.js 18.x** (required — the app enforces this via `engines` in `package.json`)
+- **Node.js 24.x** (required — the app enforces this via `engines` in `package.json`)
 - **npm** (comes with Node.js)
 - **nvm** (recommended for managing Node versions)
 
 ## Setup & Installation
 
-### 1. Install Node.js 18
+### 1. Install Node.js 24
 
 ```bash
 # Using nvm (recommended)
-nvm install 18
-nvm use 18
+nvm install 24
+nvm use 24
 
 # Verify
-node --version   # Should show v18.x.x
+node --version   # Should show v24.x.x
 ```
 
 ### 2. Install Dependencies
