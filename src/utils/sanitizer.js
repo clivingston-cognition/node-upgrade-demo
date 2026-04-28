@@ -1,6 +1,3 @@
-const url = require('url');
-const querystring = require('querystring');
-
 /**
  * Sanitize and normalize a search query string.
  * Strips protocol/host if a full URL is accidentally pasted,
@@ -13,12 +10,12 @@ function sanitizeSearchQuery(input) {
 
   // If someone pastes a full URL, extract just the search/query portion
   if (cleaned.startsWith('http://') || cleaned.startsWith('https://')) {
-    const parsed = url.parse(cleaned, true);
-    cleaned = parsed.query.q || parsed.query.search || parsed.pathname || '';
+    const parsed = new URL(cleaned);
+    cleaned = parsed.searchParams.get('q') || parsed.searchParams.get('search') || parsed.pathname || '';
   }
 
-  // Decode any percent-encoded characters using querystring
-  cleaned = querystring.unescape(cleaned);
+  // Decode any percent-encoded characters
+  cleaned = decodeURIComponent(cleaned);
 
   // Strip HTML tags for XSS prevention
   cleaned = cleaned.replace(/<[^>]*>/g, '');
@@ -43,13 +40,13 @@ function buildFilterQueryString(filters) {
     params.priority = filters.priority;
   }
   if (filters.search) {
-    params.search = querystring.escape(filters.search);
+    params.search = encodeURIComponent(filters.search);
   }
   if (filters.tag) {
     params.tag = filters.tag;
   }
 
-  return querystring.stringify(params);
+  return new URLSearchParams(params).toString();
 }
 
 /**
@@ -60,7 +57,7 @@ function parseUrl(urlString) {
   if (!urlString) return null;
 
   try {
-    const parsed = url.parse(urlString);
+    const parsed = new URL(urlString);
     if (!parsed.protocol || !parsed.host) {
       return null;
     }
@@ -68,7 +65,7 @@ function parseUrl(urlString) {
       protocol: parsed.protocol,
       host: parsed.host,
       pathname: parsed.pathname || '/',
-      query: parsed.query || '',
+      query: parsed.search ? parsed.search.slice(1) : '',
     };
   } catch {
     return null;
