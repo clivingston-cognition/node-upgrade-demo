@@ -19,11 +19,25 @@ function ensureDirectoryExists(filePath) {
   }
 }
 
+function checkFileAccess(filePath) {
+  try {
+    fs.accessSync(filePath, fs.R_OK | fs.W_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function getConnection() {
   if (db) return db;
 
   const dbPath = getDbPath();
   ensureDirectoryExists(dbPath);
+
+  // Check if existing database file is accessible
+  if (fs.existsSync(dbPath) && !checkFileAccess(dbPath)) {
+    throw new Error(`Database file ${dbPath} is not readable/writable`);
+  }
 
   db = new Database(dbPath, {
     verbose: process.env.NODE_ENV === 'development' ? console.log : undefined,

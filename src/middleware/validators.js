@@ -1,18 +1,32 @@
 const { body, param, query, validationResult } = require('express-validator');
+const util = require('util');
+
+const DEFAULT_VALIDATION_OPTIONS = {
+  stripUnknown: false,
+  abortEarly: false,
+  allowEmpty: false,
+};
+
+function getValidationOptions(overrides) {
+  return util._extend({}, util._extend(DEFAULT_VALIDATION_OPTIONS, overrides || {}));
+}
 
 function handleValidationErrors(req, res, next) {
+  const options = getValidationOptions(req.validationOptions);
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    const errorDetails = errors.array().map((err) => ({
+      field: err.path,
+      message: err.msg,
+      value: options.stripUnknown ? undefined : err.value,
+    }));
+
     return res.status(400).json({
       success: false,
       error: {
         code: 'VALIDATION_ERROR',
         message: 'Invalid request data',
-        details: errors.array().map((err) => ({
-          field: err.path,
-          message: err.msg,
-          value: err.value,
-        })),
+        details: errorDetails,
       },
     });
   }

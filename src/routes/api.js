@@ -7,6 +7,9 @@ const {
   validateListQuery,
 } = require('../middleware/validators');
 const config = require('../config');
+const { sanitizeSearchQuery, buildFilterQueryString } = require('../utils/sanitizer');
+const { encodeTodoForExport, decodeTodoFromImport, normalizeInternationalText } = require('../utils/encoding');
+const { generateSessionToken, hashContent } = require('../utils/crypto');
 
 const router = express.Router();
 
@@ -26,7 +29,7 @@ router.get('/todos', validateListQuery, (req, res) => {
     const filter = {};
     if (completed !== undefined) filter.completed = completed === 'true';
     if (priority) filter.priority = priority;
-    if (search) filter.search = search;
+    if (search) filter.search = sanitizeSearchQuery(search);
     if (tag) filter.tag = tag;
 
     const result = todoModel.findAll({
@@ -37,10 +40,16 @@ router.get('/todos', validateListQuery, (req, res) => {
       filter,
     });
 
+    const filterQuery = buildFilterQueryString(filter);
+
     res.json({
       success: true,
       data: result.todos,
       pagination: result.pagination,
+      meta: {
+        filterQuery: filterQuery || undefined,
+        contentHash: hashContent(JSON.stringify(result.todos)),
+      },
     });
   } catch (error) {
     console.error('Error fetching todos:', error);
@@ -86,7 +95,8 @@ router.get('/todos/:id', validateTodoId, (req, res) => {
 router.post('/todos', validateCreateTodo, (req, res) => {
   try {
     const { title, description, priority, tags, due_date } = req.body;
-    const todo = todoModel.create({ title, description, priority, tags, due_date });
+    const normalizedTitle = normalizeInternationalText(title);
+    const todo = todoModel.create({ title: normalizedTitle, description, priority, tags, due_date });
 
     res.status(201).json({ success: true, data: todo });
   } catch (error) {
@@ -180,6 +190,69 @@ router.delete('/todos', (_req, res) => {
       error: { code: 'DELETE_ERROR', message: 'Failed to delete completed todos' },
     });
   }
+});
+
+router.get('/todos/:id/export', validateTodoId, (req, res) => {
+  try {
+    const todo = todoModel.findById(req.params.id);
+    if (!todo) {
+      return res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Todo not found' },
+      });
+    }
+
+    const encoded = encodeTodoForExport(todo);
+    res.json({
+      success: true,
+      data: {
+        encoded,
+        hash: hashContent(encoded),
+      },
+    });
+  } catch (error) {
+    console.error('Error exporting todo:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'EXPORT_ERROR', message: 'Failed to export todo' },
+    });
+  }
+});
+
+router.post('/todos/import', (req, res) => {
+  try {
+    const { encoded } = req.body;
+    if (!encoded) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: 'Encoded todo data is required' },
+      });
+    }
+
+    const todoData = decodeTodoFromImport(encoded);
+    if (!todoData) {
+      return res.status(400).json({
+        success: false,
+        error: { code: 'DECODE_ERROR', message: 'Failed to decode todo data' },
+      });
+    }
+
+    todoData.title = normalizeInternationalText(todoData.title);
+    const todo = todoModel.create(todoData);
+
+    res.status(201).json({ success: true, data: todo });
+  } catch (error) {
+    console.error('Error importing todo:', error);
+    res.status(500).json({
+      success: false,
+      error: { code: 'IMPORT_ERROR', message: 'Failed to import todo' },
+    });
+  }
+});
+
+router.get('/session', (_req, res) => {
+  const token = generateSessionToken('web-client');
+  res.json({ success: true, data: { token } });
 });
 
 module.exports = router;
