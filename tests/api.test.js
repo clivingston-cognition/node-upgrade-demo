@@ -241,6 +241,18 @@ describe('GET /api/todos - Read All', () => {
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
   });
+
+  test('should reject invalid order parameter', async () => {
+    const res = await request(app).get('/api/todos?order=SIDEWAYS');
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  test('should reject invalid completed filter value', async () => {
+    const res = await request(app).get('/api/todos?completed=maybe');
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_ERROR');
+  });
 });
 
 describe('GET /api/todos/:id - Read One', () => {
@@ -273,6 +285,26 @@ describe('GET /api/todos/:id - Read One', () => {
   test('should return 400 for invalid UUID format', async () => {
     const res = await request(app).get('/api/todos/not-a-uuid');
 
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  test('should return 404 for a deleted todo', async () => {
+    const createRes = await request(app)
+      .post('/api/todos')
+      .send({ title: 'Will be deleted then fetched' });
+    const id = createRes.body.data.id;
+
+    await request(app).delete(`/api/todos/${id}`);
+
+    const res = await request(app).get(`/api/todos/${id}`);
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.code).toBe('NOT_FOUND');
+  });
+
+  test('should return 400 for SQL injection attempt in ID', async () => {
+    const res = await request(app).get("/api/todos/'; DROP TABLE todos; --");
     expect(res.status).toBe(400);
     expect(res.body.error.code).toBe('VALIDATION_ERROR');
   });
@@ -552,6 +584,44 @@ describe('GET /api/todos/stats - Stats', () => {
     const after = await request(app).get('/api/todos/stats');
     expect(after.body.data.total).toBe(beforeTotal + 1);
     expect(after.body.data.pending).toBe(before.body.data.pending + 1);
+  });
+
+  test('should return 404 for POST to stats endpoint', async () => {
+    const res = await request(app).post('/api/todos/stats');
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.code).toBe('NOT_FOUND');
+  });
+});
+
+describe('GET /api/todos/:id/export - Export', () => {
+  test('should return 404 when exporting a non-existent todo', async () => {
+    const res = await request(app).get('/api/todos/00000000-0000-0000-0000-000000000000/export');
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.code).toBe('NOT_FOUND');
+  });
+
+  test('should return 400 for invalid UUID format on export', async () => {
+    const res = await request(app).get('/api/todos/not-a-valid-uuid/export');
+    expect(res.status).toBe(400);
+    expect(res.body.error.code).toBe('VALIDATION_ERROR');
+  });
+});
+
+describe('GET /api/session - Session Token', () => {
+  test('should return 404 for POST to session endpoint', async () => {
+    const res = await request(app).post('/api/session');
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.code).toBe('NOT_FOUND');
+  });
+
+  test('should return 404 for DELETE to session endpoint', async () => {
+    const res = await request(app).delete('/api/session');
+    expect(res.status).toBe(404);
+    expect(res.body.success).toBe(false);
+    expect(res.body.error.code).toBe('NOT_FOUND');
   });
 });
 
